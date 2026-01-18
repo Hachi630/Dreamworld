@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
-import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, DEPTHS } from '../config/constants';
+import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, DEPTHS, ASSET_KEYS } from '../config/constants';
 import { Player } from '../entities/Player';
 
 /**
- * MapScene - Main gameplay scene with background, player, and interactions
+ * MapScene - Main gameplay scene with tilemap, player, and interactions
  */
 export class MapScene extends Phaser.Scene {
   private player?: Player;
+  private map?: Phaser.Tilemaps.Tilemap;
+  private collisionLayer?: Phaser.Tilemaps.TilemapLayer;
 
   constructor() {
     super({ key: SCENE_KEYS.MAP });
@@ -15,7 +17,7 @@ export class MapScene extends Phaser.Scene {
   create(): void {
     console.log('✓ MapScene started');
 
-    this.createBackground();
+    this.createTilemap();
     this.createPlayer();
     this.setupCamera();
     this.launchUIScene();
@@ -28,85 +30,47 @@ export class MapScene extends Phaser.Scene {
     // Update player
     if (this.player) {
       this.player.update();
-      this.player.constrainToBounds(GAME_WIDTH, GAME_HEIGHT);
     }
   }
 
-  private createBackground(): void {
-    // Create placeholder background (hand-drawn background image would go here)
-    // Using gradient rectangles for now
-    const bg1 = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT / 3, 0x87ceeb);
-    bg1.setOrigin(0, 0);
-    bg1.setDepth(DEPTHS.BACKGROUND);
+  private createTilemap(): void {
+    // Create tilemap from Tiled JSON
+    this.map = this.make.tilemap({ key: ASSET_KEYS.MAPS.TEST_MAP });
 
-    const bg2 = this.add.rectangle(
-      0,
-      GAME_HEIGHT / 3,
-      GAME_WIDTH,
-      GAME_HEIGHT / 3,
-      0x90e0ef
-    );
-    bg2.setOrigin(0, 0);
-    bg2.setDepth(DEPTHS.BACKGROUND);
+    // Add tileset image to map
+    const tileset = this.map.addTilesetImage('test-tileset', ASSET_KEYS.TILESETS.TEST_TILESET);
 
-    const ground = this.add.rectangle(
-      0,
-      (GAME_HEIGHT * 2) / 3,
-      GAME_WIDTH,
-      GAME_HEIGHT / 3,
-      0x98d8c8
-    );
-    ground.setOrigin(0, 0);
-    ground.setDepth(DEPTHS.GROUND);
-
-    // Add some decorative elements (trees, clouds, etc. would be actual images)
-    this.addDecorativeElements();
-
-    console.log('📐 Background created');
-  }
-
-  private addDecorativeElements(): void {
-    // Add some simple "clouds"
-    for (let i = 0; i < 5; i++) {
-      const x = Phaser.Math.Between(100, GAME_WIDTH - 100);
-      const y = Phaser.Math.Between(50, 200);
-      const cloud = this.add.ellipse(x, y, 80, 40, 0xffffff, 0.6);
-      cloud.setDepth(DEPTHS.BACKGROUND + 1);
-
-      // Floating animation
-      this.tweens.add({
-        targets: cloud,
-        x: x + 50,
-        duration: Phaser.Math.Between(8000, 12000),
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
+    if (!tileset) {
+      console.error('Failed to load tileset');
+      return;
     }
 
-    // Add some simple "trees"
-    for (let i = 0; i < 3; i++) {
-      const x = Phaser.Math.Between(100, GAME_WIDTH - 100);
-      const y = GAME_HEIGHT - 150;
+    // Create ground layer
+    const groundLayer = this.map.createLayer('ground', tileset, 0, 0);
+    groundLayer?.setDepth(DEPTHS.GROUND);
 
-      // Tree trunk
-      const trunk = this.add.rectangle(x, y, 20, 60, 0x8b4513);
-      trunk.setDepth(DEPTHS.GROUND + 1);
+    // Create collision layer
+    this.collisionLayer = this.map.createLayer('collision', tileset, 0, 0);
 
-      // Tree crown
-      const crown = this.add.circle(x, y - 40, 40, 0x228b22, 0.8);
-      crown.setDepth(DEPTHS.GROUND + 1);
+    if (this.collisionLayer) {
+      this.collisionLayer.setDepth(DEPTHS.GROUND + 1);
+      // Set all tiles in collision layer as colliding
+      this.collisionLayer.setCollisionByExclusion([-1]);
     }
+
+    console.log('📐 Tilemap created');
   }
 
   private createPlayer(): void {
-    // Create player in the center of the screen
-    const startX = GAME_WIDTH / 2;
-    const startY = GAME_HEIGHT / 2;
+    // Create player at tile position (15, 8) - center-ish of 30x17 map
+    this.player = new Player(this, 15, 8);
 
-    this.player = new Player(this, startX, startY);
+    // Pass collision layer reference to player
+    if (this.collisionLayer) {
+      this.player.setCollisionLayer(this.collisionLayer);
+    }
 
-    console.log('🎮 Player added to scene');
+    console.log('🎮 Player added to scene with grid movement');
   }
 
   private setupCamera(): void {
@@ -122,17 +86,17 @@ export class MapScene extends Phaser.Scene {
   }
 
   private showInstructions(): void {
-    // Add instruction text
+    // Add instruction text (smaller font for pixel-art resolution)
     const instructions = this.add.text(
       GAME_WIDTH / 2,
-      40,
-      'Use Arrow Keys to Move',
+      20,
+      'Arrow Keys to Move',
       {
-        fontSize: '24px',
+        fontSize: '12px',
         color: '#ffffff',
         fontFamily: 'Arial',
         backgroundColor: '#000000',
-        padding: { x: 20, y: 10 },
+        padding: { x: 10, y: 5 },
       }
     );
     instructions.setOrigin(0.5);

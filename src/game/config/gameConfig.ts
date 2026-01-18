@@ -22,9 +22,10 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     },
   },
   render: {
-    pixelArt: false, // Set to true if using pixel art
-    antialias: true,
-    antialiasGL: true,
+    pixelArt: true, // Crisp pixel rendering for retro RPG
+    roundPixels: true, // Snap to whole pixels
+    antialias: false, // No blur
+    antialiasGL: false, // No GL blur
   },
   audio: {
     disableWebAudio: false,

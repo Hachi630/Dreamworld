@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS } from '../config/constants';
+import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, ASSET_KEYS } from '../config/constants';
 
 /**
  * PreloadScene - Loads all game assets
@@ -11,6 +11,7 @@ export class PreloadScene extends Phaser.Scene {
 
   preload(): void {
     this.createLoadingScreen();
+    this.createTileset();
     this.loadAssets();
   }
 
@@ -85,16 +86,51 @@ export class PreloadScene extends Phaser.Scene {
     });
   }
 
-  private loadAssets(): void {
-    // Note: For now, we're not loading actual image files
-    // In the future, load assets here:
-    // this.load.image(ASSET_KEYS.BACKGROUNDS.TITLE, 'assets/images/backgrounds/title.png');
-    // this.load.image(ASSET_KEYS.BACKGROUNDS.MAP, 'assets/images/backgrounds/map.png');
-    // this.load.spritesheet(ASSET_KEYS.CHARACTERS.PLAYER, 'assets/images/characters/player.png', {
-    //   frameWidth: 32,
-    //   frameHeight: 32,
-    // });
+  /**
+   * Create tileset texture procedurally
+   */
+  private createTileset(): void {
+    // Create a 32x16 canvas for 2 tiles (16x16 each)
+    const canvas = this.textures.createCanvas('tileset-canvas', 32, 16);
 
-    console.log('📦 Asset loading configured (using placeholders for now)');
+    if (!canvas) {
+      console.error('Failed to create tileset canvas');
+      return;
+    }
+
+    const ctx = canvas.context;
+
+    // Tile 0 (0, 0): Light gray floor
+    ctx.fillStyle = '#b0b0b0';
+    ctx.fillRect(0, 0, 16, 16);
+    ctx.strokeStyle = '#909090';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, 15, 15);
+
+    // Tile 1 (16, 0): Brown wall
+    ctx.fillStyle = '#8b4513';
+    ctx.fillRect(16, 0, 16, 16);
+    ctx.strokeStyle = '#654321';
+    ctx.strokeRect(16.5, 0.5, 15, 15);
+    // Inner detail
+    ctx.fillStyle = '#a0522d';
+    ctx.fillRect(18, 2, 12, 12);
+
+    canvas.refresh();
+
+    // Add canvas as texture
+    this.textures.addCanvas(ASSET_KEYS.TILESETS.TEST_TILESET, canvas.canvas);
+
+    console.log('🎨 Tileset created procedurally');
+  }
+
+  private loadAssets(): void {
+    // Load Tiled map JSON
+    this.load.tilemapTiledJSON(
+      ASSET_KEYS.MAPS.TEST_MAP,
+      'src/game/data/maps/test-map.json'
+    );
+
+    console.log('📦 Loading tilemap assets');
   }
 }

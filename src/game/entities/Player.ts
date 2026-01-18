@@ -1,51 +1,44 @@
 import Phaser from 'phaser';
-import { PLAYER_SPEED, PLAYER_SIZE, DEPTHS } from '../config/constants';
+import { TILE_SIZE, PLAYER_TILE_SIZE, PLAYER_MOVE_DURATION, DEPTHS } from '../config/constants';
 
 /**
- * Player entity - handles player movement and behavior
+ * Player entity - handles grid-based tile movement
  */
 export class Player extends Phaser.GameObjects.Container {
   private sprite: Phaser.GameObjects.Rectangle;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-  private velocity: Phaser.Math.Vector2;
+  private isMoving: boolean = false;
   private movementEnabled: boolean = true;
+  private collisionLayer?: Phaser.Tilemaps.TilemapLayer;
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y);
+  constructor(scene: Phaser.Scene, tileX: number, tileY: number) {
+    // Convert tile coordinates to pixel coordinates (centered in tile)
+    const pixelX = tileX * TILE_SIZE + TILE_SIZE / 2;
+    const pixelY = tileY * TILE_SIZE + TILE_SIZE / 2;
 
-    // Create player sprite (using rectangle as placeholder)
-    this.sprite = scene.add.rectangle(0, 0, PLAYER_SIZE, PLAYER_SIZE, 0x63b3ed);
-    this.sprite.setStrokeStyle(2, 0x4299e1);
+    super(scene, pixelX, pixelY);
+
+    // Create player sprite (pixel-art rectangle)
+    this.sprite = scene.add.rectangle(0, 0, PLAYER_TILE_SIZE, PLAYER_TILE_SIZE, 0x63b3ed);
+    this.sprite.setStrokeStyle(1, 0x4299e1);
     this.add(this.sprite);
 
-    // Set depth
     this.setDepth(DEPTHS.PLAYER);
-
-    // Initialize velocity
-    this.velocity = new Phaser.Math.Vector2(0, 0);
-
-    // Setup input
     this.setupInput();
-
-    // Add to scene
     scene.add.existing(this);
 
-    // Add subtle idle animation
-    scene.tweens.add({
-      targets: this.sprite,
-      scaleY: 1.05,
-      duration: 1000,
-      ease: 'Sine.easeInOut',
-      yoyo: true,
-      repeat: -1,
-    });
-
-    console.log(`🎮 Player created at (${x}, ${y})`);
+    console.log(`🎮 Player created at tile (${tileX}, ${tileY})`);
   }
 
   private setupInput(): void {
-    // Setup cursor keys
     this.cursors = this.scene.input.keyboard?.createCursorKeys();
+  }
+
+  /**
+   * Set the collision layer for wall detection
+   */
+  setCollisionLayer(layer: Phaser.Tilemaps.TilemapLayer): void {
+    this.collisionLayer = layer;
   }
 
   /**
@@ -53,77 +46,88 @@ export class Player extends Phaser.GameObjects.Container {
    */
   setMovementEnabled(enabled: boolean): void {
     this.movementEnabled = enabled;
-    if (!enabled) {
-      this.velocity.set(0, 0);
-    }
   }
 
   /**
-   * Update player position based on input
+   * Update player - check for input and handle grid movement
    */
   update(): void {
-    if (!this.movementEnabled || !this.cursors) {
+    if (!this.movementEnabled || !this.cursors || this.isMoving) {
       return;
     }
 
-    // Reset velocity
-    this.velocity.set(0, 0);
-
-    // Check input and set velocity
-    if (this.cursors.left.isDown) {
-      this.velocity.x = -1;
-    } else if (this.cursors.right.isDown) {
-      this.velocity.x = 1;
-    }
-
-    if (this.cursors.up.isDown) {
-      this.velocity.y = -1;
-    } else if (this.cursors.down.isDown) {
-      this.velocity.y = 1;
-    }
-
-    // Normalize diagonal movement
-    if (this.velocity.length() > 0) {
-      this.velocity.normalize();
-    }
-
-    // Apply movement
-    const delta = this.scene.game.loop.delta / 1000; // Convert to seconds
-    this.x += this.velocity.x * PLAYER_SPEED * delta;
-    this.y += this.velocity.y * PLAYER_SPEED * delta;
-
-    // Update visual feedback based on movement
-    if (this.velocity.length() > 0) {
-      // Moving - slightly larger
-      this.sprite.setScale(1.1, 1);
-    } else {
-      // Idle - normal scale (animation handles the subtle bounce)
-      this.sprite.setScale(1, 1);
+    // Check arrow key presses (JustDown = single press, not held)
+    if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
+      this.tryMove(-1, 0);
+    } else if (Phaser.Input.Keyboard.JustDown(this.cursors.right)) {
+      this.tryMove(1, 0);
+    } else if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
+      this.tryMove(0, -1);
+    } else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
+      this.tryMove(0, 1);
     }
   }
 
   /**
-   * Constrain player position to bounds
+   * Try to move in a direction - checks collision first
    */
-  constrainToBounds(width: number, height: number): void {
-    const halfSize = PLAYER_SIZE / 2;
-    this.x = Phaser.Math.Clamp(this.x, halfSize, width - halfSize);
-    this.y = Phaser.Math.Clamp(this.y, halfSize, height - halfSize);
+  private tryMove(deltaX: number, deltaY: number): void {
+    // Calculate target tile position
+    const currentTileX = Math.floor(this.x / TILE_SIZE);
+    const currentTileY = Math.floor(this.y / TILE_SIZE);
+    const targetTileX = currentTileX + deltaX;
+    const targetTileY = currentTileY + deltaY;
+
+    // Check collision
+    if (this.collisionLayer) {
+      const tile = this.collisionLayer.getTileAt(targetTileX, targetTileY);
+      if (tile) {
+        // Tile exists in collision layer - block movement
+        console.log(`🚫 Collision at (${targetTileX}, ${targetTileY})`);
+        return;
+      }
+    }
+
+    // No collision - perform move
+    this.moveToTile(targetTileX, targetTileY);
   }
 
   /**
-   * Get player's current position
+   * Move to target tile with smooth tween animation
+   */
+  private moveToTile(tileX: number, tileY: number): void {
+    this.isMoving = true;
+
+    const targetX = tileX * TILE_SIZE + TILE_SIZE / 2;
+    const targetY = tileY * TILE_SIZE + TILE_SIZE / 2;
+
+    // Tween to target position
+    this.scene.tweens.add({
+      targets: this,
+      x: targetX,
+      y: targetY,
+      duration: PLAYER_MOVE_DURATION,
+      ease: 'Linear',
+      onComplete: () => {
+        this.isMoving = false;
+      },
+    });
+  }
+
+  /**
+   * Get player's current tile position
+   */
+  getTilePosition(): { tileX: number; tileY: number } {
+    return {
+      tileX: Math.floor(this.x / TILE_SIZE),
+      tileY: Math.floor(this.y / TILE_SIZE),
+    };
+  }
+
+  /**
+   * Get player's current pixel position
    */
   getPosition(): { x: number; y: number } {
     return { x: this.x, y: this.y };
-  }
-
-  /**
-   * Set player position
-   */
-  setPosition(x: number, y: number): this {
-    this.x = x;
-    this.y = y;
-    return this;
   }
 }

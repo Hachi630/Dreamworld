@@ -56,9 +56,9 @@ export class TitleScene extends Phaser.Scene {
   private createTitle(): void {
     const centerX = GAME_WIDTH / 2;
 
-    // Main title with Chinese character
-    const dreamChar = this.add.text(centerX, 200, '梦', {
-      fontSize: '120px',
+    // Main title with Chinese character (scaled down for pixel-art resolution)
+    const dreamChar = this.add.text(centerX, 70, '梦', {
+      fontSize: '48px',
       color: '#ffffff',
       fontFamily: 'Arial',
       fontStyle: 'bold',
@@ -66,8 +66,8 @@ export class TitleScene extends Phaser.Scene {
     dreamChar.setOrigin(0.5);
 
     // Subtitle
-    const subtitle = this.add.text(centerX, 320, 'Dream World', {
-      fontSize: '48px',
+    const subtitle = this.add.text(centerX, 120, 'Dream World', {
+      fontSize: '20px',
       color: '#63b3ed',
       fontFamily: 'Arial',
       fontStyle: 'italic',
@@ -77,7 +77,7 @@ export class TitleScene extends Phaser.Scene {
     // Floating animation for title
     this.tweens.add({
       targets: [dreamChar, subtitle],
-      y: '+=10',
+      y: '+=5',
       duration: 2000,
       ease: 'Sine.easeInOut',
       yoyo: true,
@@ -87,16 +87,16 @@ export class TitleScene extends Phaser.Scene {
 
   private createStartButton(): void {
     const centerX = GAME_WIDTH / 2;
-    const centerY = GAME_HEIGHT / 2 + 150;
+    const centerY = GAME_HEIGHT / 2 + 40;
 
-    // Button background
-    this.startButton = this.add.rectangle(centerX, centerY, 200, 60, COLORS.ACCENT);
-    this.startButton.setStrokeStyle(3, COLORS.PRIMARY);
+    // Button background (scaled for pixel-art resolution)
+    this.startButton = this.add.rectangle(centerX, centerY, 80, 24, COLORS.ACCENT);
+    this.startButton.setStrokeStyle(2, COLORS.PRIMARY);
     this.startButton.setInteractive({ useHandCursor: true });
 
     // Button text
     this.startText = this.add.text(centerX, centerY, 'Start', {
-      fontSize: '32px',
+      fontSize: '14px',
       color: '#ffffff',
       fontFamily: 'Arial',
       fontStyle: 'bold',
@@ -120,8 +120,8 @@ export class TitleScene extends Phaser.Scene {
     });
 
     // Press Enter hint
-    const hint = this.add.text(centerX, centerY + 60, 'or press ENTER', {
-      fontSize: '16px',
+    const hint = this.add.text(centerX, centerY + 24, 'or press ENTER', {
+      fontSize: '10px',
       color: '#a0aec0',
       fontFamily: 'Arial',
     });
