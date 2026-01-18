@@ -2,35 +2,12 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Typewriter Effect</title>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            font-family: monospace;
-            font-size: 2em;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream World - 梦</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
-    <div id="typewriter"></div>
-    <script>
-        const text = "梦";
-        let index = 0;
-        const element = document.getElementById('typewriter');
-        function typeWriter() {
-            if (index < text.length) {
-                element.innerHTML += text.charAt(index);
-                index++;
-                setTimeout(typeWriter, 500); // 每500ms打一个字
-            }
-        }
-        typeWriter();
-    </script>
+    <div id="game-container"></div>
+    <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
