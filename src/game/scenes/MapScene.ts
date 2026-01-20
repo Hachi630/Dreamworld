@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, DEPTHS, ASSET_KEYS } from '../config/constants';
 import { Player } from '../entities/Player';
 
@@ -15,7 +15,7 @@ export class MapScene extends Phaser.Scene {
   }
 
   create(): void {
-    console.log('✓ MapScene started');
+    console.log('MapScene started');
 
     this.createTilemap();
     this.createPlayer();
@@ -58,7 +58,7 @@ export class MapScene extends Phaser.Scene {
       this.collisionLayer.setCollisionByExclusion([-1]);
     }
 
-    console.log('📐 Tilemap created');
+    console.log('Tilemap created');
   }
 
   private createPlayer(): void {
@@ -70,7 +70,7 @@ export class MapScene extends Phaser.Scene {
       this.player.setCollisionLayer(this.collisionLayer);
     }
 
-    console.log('🎮 Player added to scene with grid movement');
+    console.log('Player added to scene with grid movement');
   }
 
   private setupCamera(): void {
@@ -82,7 +82,7 @@ export class MapScene extends Phaser.Scene {
   private launchUIScene(): void {
     // Launch UI scene as overlay (runs in parallel)
     this.scene.launch(SCENE_KEYS.UI);
-    console.log('📱 UI Scene launched');
+    console.log('UI Scene launched');
   }
 
   private showInstructions(): void {
@@ -90,18 +90,18 @@ export class MapScene extends Phaser.Scene {
     const instructions = this.add.text(
       GAME_WIDTH / 2,
       20,
-      'Arrow Keys to Move',
+      'ARROWS TO MOVE',
       {
-        fontSize: '12px',
-        color: '#ffffff',
-        fontFamily: 'Arial',
-        backgroundColor: '#000000',
-        padding: { x: 10, y: 5 },
+        fontSize: '8px',
+        color: '#f7f3e3',
+        fontFamily: '"Press Start 2P", "VT323", monospace',
+        backgroundColor: '#0b1220',
+        padding: { x: 8, y: 4 },
       }
     );
     instructions.setOrigin(0.5);
     instructions.setDepth(DEPTHS.UI_TEXT);
-    instructions.setAlpha(0.8);
+    instructions.setAlpha(0.9);
 
     // Fade out after a few seconds
     this.tweens.add({

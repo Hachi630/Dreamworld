@@ -4,14 +4,25 @@
   box-sizing: border-box;
 }
 
+:root {
+  --pixel-dark: #0f1b2b;
+  --pixel-mid: #1b263b;
+  --pixel-light: #2b3a55;
+  --pixel-accent: #ffd166;
+  --pixel-text: #f7f3e3;
+}
+
 html,
 body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #1a202c;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(255, 209, 102, 0.08), transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(62, 146, 204, 0.12), transparent 50%),
+    linear-gradient(180deg, #0b1220 0%, #0f1b2b 60%, #1b263b 100%);
+  font-family: 'Press Start 2P', 'VT323', monospace;
+  color: var(--pixel-text);
 }
 
 #game-container {
@@ -25,4 +36,11 @@ body {
 canvas {
   display: block;
   outline: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 6px solid var(--pixel-light);
+  box-shadow:
+    0 0 0 2px var(--pixel-dark),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+  background-color: var(--pixel-dark);
 }

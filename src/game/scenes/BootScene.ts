@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS } from '../config/constants';
 
 /**
@@ -15,7 +15,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    console.log('✓ BootScene complete');
+    console.log('BootScene complete');
     // Transition to PreloadScene
     this.scene.start(SCENE_KEYS.PRELOAD);
   }
@@ -25,36 +25,39 @@ export class BootScene extends Phaser.Scene {
     const centerY = GAME_HEIGHT / 2;
 
     // Loading text
-    const loadingText = this.add.text(centerX, centerY - 50, 'Loading...', {
-      fontSize: '32px',
-      color: '#ffffff',
-      fontFamily: 'Arial',
+    const loadingText = this.add.text(centerX, centerY - 40, 'Loading...', {
+      fontSize: '12px',
+      color: '#f7f3e3',
+      fontFamily: '"Press Start 2P", "VT323", monospace',
     });
     loadingText.setOrigin(0.5);
+
+    const barWidth = 220;
+    const barHeight = 14;
 
     // Progress bar background
     const progressBarBg = this.add.rectangle(
       centerX,
       centerY,
-      400,
-      30,
+      barWidth + 8,
+      barHeight + 6,
       COLORS.SECONDARY
     );
     progressBarBg.setStrokeStyle(2, COLORS.PRIMARY);
 
     // Progress bar fill
     const progressBar = this.add.rectangle(
-      centerX - 198,
+      centerX - barWidth / 2,
       centerY,
       0,
-      26,
+      barHeight,
       COLORS.ACCENT
     );
     progressBar.setOrigin(0, 0.5);
 
     // Update progress bar as files load
     this.load.on('progress', (value: number) => {
-      progressBar.width = 396 * value;
+      progressBar.width = barWidth * value;
     });
 
     // Clean up loading graphics when complete

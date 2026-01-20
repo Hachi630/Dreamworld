@@ -56,11 +56,11 @@ export const INPUT_KEYS = {
 
 // Colors
 export const COLORS = {
-  PRIMARY: 0x4a5568,
-  SECONDARY: 0x2d3748,
-  ACCENT: 0x63b3ed,
-  TEXT: 0xffffff,
-  BACKGROUND: 0x1a202c,
+  PRIMARY: 0x2b3a55,
+  SECONDARY: 0x1b263b,
+  ACCENT: 0xffd166,
+  TEXT: 0xf7f3e3,
+  BACKGROUND: 0x0f1b2b,
 } as const;
 
 // Layer depths

@@ -1,11 +1,13 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { TILE_SIZE, PLAYER_TILE_SIZE, PLAYER_MOVE_DURATION, DEPTHS } from '../config/constants';
 
 /**
  * Player entity - handles grid-based tile movement
  */
 export class Player extends Phaser.GameObjects.Container {
-  private sprite: Phaser.GameObjects.Rectangle;
+  private body: Phaser.GameObjects.Rectangle;
+  private highlight: Phaser.GameObjects.Rectangle;
+  private shadow: Phaser.GameObjects.Rectangle;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private isMoving: boolean = false;
   private movementEnabled: boolean = true;
@@ -18,16 +20,20 @@ export class Player extends Phaser.GameObjects.Container {
 
     super(scene, pixelX, pixelY);
 
-    // Create player sprite (pixel-art rectangle)
-    this.sprite = scene.add.rectangle(0, 0, PLAYER_TILE_SIZE, PLAYER_TILE_SIZE, 0x63b3ed);
-    this.sprite.setStrokeStyle(1, 0x4299e1);
-    this.add(this.sprite);
+    // Create player sprite (pixel-art blocks)
+    this.body = scene.add.rectangle(0, 0, PLAYER_TILE_SIZE, PLAYER_TILE_SIZE, 0x5bc0be);
+    this.body.setStrokeStyle(1, 0x1b263b);
+
+    this.highlight = scene.add.rectangle(-4, -4, 6, 6, 0xf7f3e3, 0.8);
+    this.shadow = scene.add.rectangle(4, 4, 6, 6, 0x0b1220, 0.4);
+
+    this.add([this.body, this.highlight, this.shadow]);
 
     this.setDepth(DEPTHS.PLAYER);
     this.setupInput();
     scene.add.existing(this);
 
-    console.log(`🎮 Player created at tile (${tileX}, ${tileY})`);
+    console.log(`Player created at tile (${tileX}, ${tileY})`);
   }
 
   private setupInput(): void {
@@ -83,7 +89,7 @@ export class Player extends Phaser.GameObjects.Container {
       const tile = this.collisionLayer.getTileAt(targetTileX, targetTileY);
       if (tile) {
         // Tile exists in collision layer - block movement
-        console.log(`🚫 Collision at (${targetTileX}, ${targetTileY})`);
+        console.log(`Collision at (${targetTileX}, ${targetTileY})`);
         return;
       }
     }
