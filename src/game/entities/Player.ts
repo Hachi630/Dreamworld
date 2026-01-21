@@ -1,17 +1,19 @@
 ﻿import Phaser from 'phaser';
-import { TILE_SIZE, PLAYER_TILE_SIZE, PLAYER_MOVE_DURATION, DEPTHS } from '../config/constants';
+import { TILE_SIZE, PLAYER_MOVE_DURATION, DEPTHS } from '../config/constants';
 
 /**
  * Player entity - handles grid-based tile movement
  */
 export class Player extends Phaser.GameObjects.Container {
-  private body: Phaser.GameObjects.Rectangle;
-  private highlight: Phaser.GameObjects.Rectangle;
-  private shadow: Phaser.GameObjects.Rectangle;
+  private sprite: Phaser.GameObjects.Image;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private isMoving: boolean = false;
   private movementEnabled: boolean = true;
   private collisionLayer?: Phaser.Tilemaps.TilemapLayer;
+  private facingRight: boolean = true; // 用于侧面图片翻转
+
+  // 移动完成回调
+  public onMoveComplete?: (tileX: number, tileY: number) => void;
 
   constructor(scene: Phaser.Scene, tileX: number, tileY: number) {
     // Convert tile coordinates to pixel coordinates (centered in tile)
@@ -20,14 +22,11 @@ export class Player extends Phaser.GameObjects.Container {
 
     super(scene, pixelX, pixelY);
 
-    // Create player sprite (pixel-art blocks)
-    this.body = scene.add.rectangle(0, 0, PLAYER_TILE_SIZE, PLAYER_TILE_SIZE, 0x5bc0be);
-    this.body.setStrokeStyle(1, 0x1b263b);
+    // 使用图片创建玩家精灵
+    this.sprite = scene.add.image(0, 0, 'player-front');
+    this.sprite.setScale(0.5); // 根据需要调整大小
 
-    this.highlight = scene.add.rectangle(-4, -4, 6, 6, 0xf7f3e3, 0.8);
-    this.shadow = scene.add.rectangle(4, 4, 6, 6, 0x0b1220, 0.4);
-
-    this.add([this.body, this.highlight, this.shadow]);
+    this.add([this.sprite]);
 
     this.setDepth(DEPTHS.PLAYER);
     this.setupInput();
@@ -78,6 +77,9 @@ export class Player extends Phaser.GameObjects.Container {
    * Try to move in a direction - checks collision first
    */
   private tryMove(deltaX: number, deltaY: number): void {
+    // 根据方向切换角色图片
+    this.updateSpriteDirection(deltaX, deltaY);
+
     // Calculate target tile position
     const currentTileX = Math.floor(this.x / TILE_SIZE);
     const currentTileY = Math.floor(this.y / TILE_SIZE);
@@ -99,6 +101,27 @@ export class Player extends Phaser.GameObjects.Container {
   }
 
   /**
+   * 根据移动方向更新角色图片
+   */
+  private updateSpriteDirection(deltaX: number, deltaY: number): void {
+    if (deltaY < 0) {
+      // 向上 - 显示背面
+      this.sprite.setTexture('player-back');
+      this.sprite.setFlipX(false);
+    } else if (deltaY > 0) {
+      // 向下 - 显示正面
+      this.sprite.setTexture('player-front');
+      this.sprite.setFlipX(false);
+    } else if (deltaX !== 0) {
+      // 左右 - 显示侧面
+      this.sprite.setTexture('player-side');
+      // 向左时翻转图片
+      this.facingRight = deltaX > 0;
+      this.sprite.setFlipX(!this.facingRight);
+    }
+  }
+
+  /**
    * Move to target tile with smooth tween animation
    */
   private moveToTile(tileX: number, tileY: number): void {
@@ -116,6 +139,8 @@ export class Player extends Phaser.GameObjects.Container {
       ease: 'Linear',
       onComplete: () => {
         this.isMoving = false;
+        // 触发移动完成回调
+        this.onMoveComplete?.(tileX, tileY);
       },
     });
   }

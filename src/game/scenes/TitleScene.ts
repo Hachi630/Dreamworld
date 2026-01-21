@@ -32,7 +32,7 @@ export class TitleScene extends Phaser.Scene {
       for (let x = 0; x < GAME_WIDTH; x += pixel) {
         const noise = Phaser.Math.Between(-1, 1);
         const index = Phaser.Math.Clamp(band + noise, 0, colors.length - 1);
-        sky.fillStyle(colors[index], 1);
+        sky.fillStyle(colors[index] ?? colors[0]!, 1);
         sky.fillRect(x, y, pixel, pixel);
       }
     }
@@ -66,7 +66,7 @@ export class TitleScene extends Phaser.Scene {
     const centerX = GAME_WIDTH / 2;
 
     // Main title
-    const dreamChar = this.add.text(centerX, 70, '梦', {
+    const dreamChar = this.add.text(centerX, 70, 'ユメセカイ', {
       fontSize: '32px',
       color: '#f7f3e3',
       fontFamily: '"Press Start 2P", "VT323", monospace',
@@ -75,7 +75,7 @@ export class TitleScene extends Phaser.Scene {
     dreamChar.setOrigin(0.5);
 
     // Subtitle
-    const subtitle = this.add.text(centerX, 120, 'Dream World', {
+    const subtitle = this.add.text(centerX, 120, 'Yume Sekai', {
       fontSize: '16px',
       color: '#ffd166',
       fontFamily: '"Press Start 2P", "VT323", monospace',
@@ -155,13 +155,35 @@ export class TitleScene extends Phaser.Scene {
   }
 
   private startGame(): void {
-    // Flash effect
-    this.cameras.main.flash(500, 255, 255, 255);
+    // 淡出到黑屏
+    this.cameras.main.fadeOut(800, 0, 0, 0);
 
-    // Start the map scene after flash
-    this.time.delayedCall(500, () => {
-      console.log('Starting game...');
-      this.scene.start(SCENE_KEYS.MAP);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      // 清除标题场景内容，显示纯黑背景
+      this.children.removeAll();
+      this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000);
+
+      // 淡入黑屏
+      this.cameras.main.fadeIn(500, 0, 0, 0);
+
+      // 启动 UI 场景显示对话框
+      this.scene.launch(SCENE_KEYS.UI);
+
+      // 延迟一下再显示对话
+      this.time.delayedCall(800, () => {
+        const uiScene = this.scene.get(SCENE_KEYS.UI) as import('./UIScene').UIScene;
+
+        // 播放对话序列
+        uiScene.playDialogues([
+          { text: '你醒了。', speaker: '???' },
+          { text: '这里是...梦境世界。', speaker: '???' },
+          { text: '去探索吧。', speaker: '???' },
+        ], () => {
+          // 对话结束后进入地图
+          this.scene.stop(SCENE_KEYS.UI);
+          this.scene.start(SCENE_KEYS.MAP);
+        });
+      });
     });
   }
 }

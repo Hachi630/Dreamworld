@@ -7,7 +7,7 @@ export const GAME_WIDTH = 480;
 export const GAME_HEIGHT = 270;
 
 // Tile constants
-export const TILE_SIZE = 16; // Standard pixel-art tile size
+export const TILE_SIZE = 32; // Standard pixel-art tile size
 export const PLAYER_TILE_SIZE = 16; // Player sprite size in pixels
 
 // Player movement
@@ -22,6 +22,7 @@ export const SCENE_KEYS = {
   TITLE: 'TitleScene',
   MAP: 'MapScene',
   UI: 'UIScene',
+  BATTLE: 'BattleScene',
 } as const;
 
 // Asset keys

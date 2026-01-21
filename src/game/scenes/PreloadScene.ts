@@ -32,7 +32,7 @@ export class PreloadScene extends Phaser.Scene {
       for (let x = 0; x < GAME_WIDTH; x += pixel) {
         const noise = Phaser.Math.Between(-1, 1);
         const index = Phaser.Math.Clamp(band + noise, 0, colors.length - 1);
-        sky.fillStyle(colors[index], 1);
+        sky.fillStyle(colors[index] ?? colors[0]!, 1);
         sky.fillRect(x, y, pixel, pixel);
       }
     }
@@ -109,8 +109,8 @@ export class PreloadScene extends Phaser.Scene {
    * Create tileset texture procedurally
    */
   private createTileset(): void {
-    // Create a 32x16 canvas for 2 tiles (16x16 each)
-    const canvas = this.textures.createCanvas('tileset-canvas', 32, 16);
+    // Create a 64x32 canvas for 2 tiles (32x32 each)
+    const canvas = this.textures.createCanvas('tileset-canvas', 64, 32);
 
     if (!canvas) {
       console.error('Failed to create tileset canvas');
@@ -119,23 +119,23 @@ export class PreloadScene extends Phaser.Scene {
 
     const ctx = canvas.context;
 
-    // Tile 0 (0, 0): Pixel floor
+    // Tile 0 (0, 0): Pixel floor (32x32)
     ctx.fillStyle = '#6b7280';
-    ctx.fillRect(0, 0, 16, 16);
+    ctx.fillRect(0, 0, 32, 32);
     ctx.strokeStyle = '#4b5563';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(0.5, 0.5, 15, 15);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, 30, 30);
     ctx.fillStyle = '#7b8794';
-    ctx.fillRect(2, 2, 4, 4);
+    ctx.fillRect(4, 4, 8, 8);
 
-    // Tile 1 (16, 0): Brick wall
+    // Tile 1 (32, 0): Brick wall (32x32)
     ctx.fillStyle = '#8b5a2b';
-    ctx.fillRect(16, 0, 16, 16);
+    ctx.fillRect(32, 0, 32, 32);
     ctx.strokeStyle = '#5c3a1a';
-    ctx.strokeRect(16.5, 0.5, 15, 15);
+    ctx.strokeRect(33, 1, 30, 30);
     ctx.fillStyle = '#a56b3f';
-    ctx.fillRect(18, 2, 12, 6);
-    ctx.fillRect(18, 10, 6, 4);
+    ctx.fillRect(36, 4, 24, 12);
+    ctx.fillRect(36, 20, 12, 8);
 
     canvas.refresh();
 
@@ -151,6 +151,14 @@ export class PreloadScene extends Phaser.Scene {
       ASSET_KEYS.MAPS.TEST_MAP,
       'src/game/data/maps/test-map.json'
     );
+
+    // 加载玩家角色图片
+    this.load.image('player-front', 'sprites/Effects_Midget_Front.gif');
+    this.load.image('player-back', 'sprites/Effects_Midget_Back.jpg');
+    this.load.image('player-side', 'sprites/Effects_Midget_Side.gif');
+
+    // 加载地图背景
+    this.load.image('map-background', 'map88.png');
 
     console.log('Loading tilemap assets');
   }

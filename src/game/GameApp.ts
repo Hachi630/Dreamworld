@@ -5,6 +5,7 @@ import { PreloadScene } from './scenes/PreloadScene';
 import { TitleScene } from './scenes/TitleScene';
 import { MapScene } from './scenes/MapScene';
 import { UIScene } from './scenes/UIScene';
+import { BattleScene } from './scenes/BattleScene';
 
 /**
  * Main game application class
@@ -17,7 +18,7 @@ export class GameApp {
     // Add all scenes to the config
     const config: Phaser.Types.Core.GameConfig = {
       ...gameConfig,
-      scene: [BootScene, PreloadScene, TitleScene, MapScene, UIScene],
+      scene: [BootScene, PreloadScene, TitleScene, MapScene, UIScene, BattleScene],
     };
 
     // Create the game instance
