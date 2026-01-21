@@ -1,5 +1,6 @@
 ﻿import Phaser from 'phaser';
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, COLORS, ASSET_KEYS } from '../config/constants';
+import { ensureMonsterTextures, ensurePlayerTextures } from '../assets/pixelSprites';
 
 /**
  * PreloadScene - Loads all game assets
@@ -13,6 +14,7 @@ export class PreloadScene extends Phaser.Scene {
     this.createPixelBackdrop();
     this.createLoadingScreen();
     this.createTileset();
+    this.createPixelCharacterSprites();
     this.loadAssets();
   }
 
@@ -152,14 +154,15 @@ export class PreloadScene extends Phaser.Scene {
       'src/game/data/maps/test-map.json'
     );
 
-    // 加载玩家角色图片
-    this.load.image('player-front', 'sprites/Effects_Midget_Front.gif');
-    this.load.image('player-back', 'sprites/Effects_Midget_Back.jpg');
-    this.load.image('player-side', 'sprites/Effects_Midget_Side.gif');
-
     // 加载地图背景
     this.load.image('map-background', 'map88.png');
 
     console.log('Loading tilemap assets');
+  }
+
+  private createPixelCharacterSprites(): void {
+    // Generate pixel-art textures at runtime (player + all monsters)
+    ensurePlayerTextures(this);
+    ensureMonsterTextures(this);
   }
 }

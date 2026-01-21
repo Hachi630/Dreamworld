@@ -24,7 +24,8 @@ export class Player extends Phaser.GameObjects.Container {
 
     // 使用图片创建玩家精灵
     this.sprite = scene.add.image(0, 0, 'player-front');
-    this.sprite.setScale(0.5); // 根据需要调整大小
+    // 16x16 pixel sprite scaled to fit 32x32 tiles
+    this.sprite.setScale(2);
 
     this.add([this.sprite]);
 

@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+﻿import Phaser from 'phaser';
 import { SCENE_KEYS, GAME_WIDTH, GAME_HEIGHT, DEPTHS, ASSET_KEYS } from '../config/constants';
 import { Player } from '../entities/Player';
 import { Monster } from '../entities/Monster';
@@ -251,3 +251,4 @@ export class MapScene extends Phaser.Scene {
     return this.player;
   }
 }
+

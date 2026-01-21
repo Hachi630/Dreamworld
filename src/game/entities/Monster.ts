@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Monster 实体类 - 怪物个体
  */
 
@@ -269,3 +269,4 @@ export class Monster {
     return monster;
   }
 }
+

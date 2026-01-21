@@ -1,5 +1,5 @@
-/**
- * 怪物数据库 - 5种初始怪物
+﻿/**
+ * 怪物数据 - 5种初始怪物
  */
 
 import { MonsterSpecies, ElementType, NatureType, NatureModifier } from '../types/MonsterTypes';
@@ -130,7 +130,7 @@ export const MONSTER_DATABASE: Record<number, MonsterSpecies> = {
 };
 
 /**
- * 性格修正表
+ * 性格修正
  */
 export const NATURE_MODIFIERS: Record<NatureType, NatureModifier> = {
   [NatureType.HARDY]: { attack: 1, defense: 1, spAttack: 1, spDefense: 1, speed: 1 },
